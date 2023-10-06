@@ -7,6 +7,8 @@ const BlogPostSchema = new Schema({
   body: String
 })
 
+console.log('HIIII WALA KAY LAMI');
+
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
 
 module.exports = BlogPost;
