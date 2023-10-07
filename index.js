@@ -9,6 +9,8 @@ const BlogPost = require("./models/BlogPost");
 //contoller
 const newUserController = require("./controllers/newUser");
 const storeUserController = require("./controllers/storeUser");
+const loginController = require("./controllers/login");
+const loginUserController = require("./controllers/loginUser");
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/blog-app")
@@ -62,7 +64,15 @@ app.post("/posts/store", async (req, res) => {
 app.get("/auth/register", (req, res) => {
   res.render("register");
 });
+
 app.post("/users/register", storeUserController);
+
+app.get('/auth/login', loginController);
+
+app.post('/users/login',loginUserController)
+
+
+
 
 //to do
 //create a search function
