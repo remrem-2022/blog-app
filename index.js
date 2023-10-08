@@ -30,6 +30,8 @@ const newPostController = require("./controllers/newPost");
 const getPostController = require("./controllers/post");
 const storePostController = require("./controllers/postStore");
 const logoutController = require("./controllers/logout");
+const contactController = require("./controllers/contact");
+const aboutController = require("./controllers/about");
 
 //middleware
 const authMiddleware = require("./middleware/authMiddleware");
@@ -44,7 +46,6 @@ app.use(
     secret: "keyboard cat",
   })
 );
-
 app.use("*", (req, res, next) => {
   loggedIn = req.session.userId;
   next();
@@ -65,7 +66,6 @@ app.post(
   redirectIfAuthenticatedMiddleware,
   storeUserController
 );
-
 app.post(
   "/users/login",
   redirectIfAuthenticatedMiddleware,
@@ -73,6 +73,11 @@ app.post(
 );
 
 app.get("/auth/logout", logoutController);
+
+app.get("/contact", contactController);
+
+app.get("/about", aboutController);
+
 app.use((req, res) => res.render("notfound"));
 
 //to do

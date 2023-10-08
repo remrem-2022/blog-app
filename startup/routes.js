@@ -13,6 +13,8 @@ const userRegister = require('../routes/userRegister');
 const contact = require('../routes/contact');
 const about = require('../routes/about');
 
+global.loggedIn = null;
+
 module.exports = function(app) {
     //middleware
     app.use(express.static("public"));
@@ -22,6 +24,11 @@ module.exports = function(app) {
     app.use(expressSession({
   secret: 'keyboard cat'
   }))
+
+  app.use('/', userRegister);
+  app.use('/users/login', userLogin);
+  app.use('/auth/register', userRegister);
+  app.use('/contact', contact);
 
   //set the engine
     app.set("view engine", "ejs");
