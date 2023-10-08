@@ -5,10 +5,8 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const BlogPost = require("./models/BlogPost");
-
-//contoller
-const newUserController = require("./controllers/newUser");
-const storeUserController = require("./controllers/storeUser");
+const expressSession = require("express-session");
+global.loggedIn = null;
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/blog-app")
@@ -20,49 +18,58 @@ mongoose
   });
 
 const app = express();
+//contoller
+const homeContoller = require("./controllers/homeController");
+const newUserController = require("./controllers/newUser");
+const storeUserController = require("./controllers/storeUser");
+const loginController = require("./controllers/login");
+const loginUserController = require("./controllers/loginUser");
+const newPostController = require("./controllers/newPost");
+const getPostController = require("./controllers/post");
+const storePostController = require("./controllers/postStore");
+const logoutController = require("./controllers/logout");
 
 //middleware
+const authMiddleware = require("./middleware/authMiddleware");
+const redirectIfAuthenticatedMiddleware = require("./middleware/redirectIfAuthenticatedMiddleware");
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
+app.set("trust proxy", 1); // trust first proxy
+app.use(
+  expressSession({
+    secret: "keyboard cat",
+  })
+);
+app.use("*", (req, res, next) => {
+  loggedIn = req.session.userId;
+  next();
+});
 
 //set the engine
 app.set("view engine", "ejs");
 
-app.get("/", async (req, res) => {
-  const blogposts = await BlogPost.find();
-  res.render("index", { blogposts });
-});
+app.get("/", homeContoller);
+app.get("/post/:id", getPostController);
+app.get("/posts/new", authMiddleware, newPostController);
 
-app.get("/about", (req, res) => {
-  res.render("about");
-});
+app.get("/auth/register", redirectIfAuthenticatedMiddleware, newUserController);
+app.get("/auth/login", redirectIfAuthenticatedMiddleware, loginController);
+app.post("/posts/store", authMiddleware, storePostController);
+app.post(
+  "/users/register",
+  redirectIfAuthenticatedMiddleware,
+  storeUserController
+);
+app.post(
+  "/users/login",
+  redirectIfAuthenticatedMiddleware,
+  loginUserController
+);
 
-app.get("/post/:id", async (req, res) => {
-  const blogpost = await BlogPost.findById(req.params.id);
-  res.render("post", { blogpost });
-});
-
-app.get("/contact", (req, res) => {
-  res.render("contact");
-});
-
-app.get("/create", (req, res) => {
-  res.render("create");
-});
-
-app.post("/posts/store", async (req, res) => {
-  let image = req.files.image;
-  image.mv(path.resolve(__dirname, "public/img", image.name));
-  await BlogPost.create({ ...req.body, image: "/img/" + image.name });
-  res.redirect("/");
-});
-
-app.get("/auth/register", (req, res) => {
-  res.render("register");
-});
-app.post("/users/register", storeUserController);
+app.get("/auth/logout", logoutController);
+app.use((req, res) => res.render("notfound"));
 
 //to do
 //create a search function

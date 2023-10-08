@@ -4,12 +4,12 @@ const bcrypt = require("bcrypt");
 const UserSchema = new Schema({
   username: {
     type: String,
-    required: true,
+    require: true,
     unique: true,
   },
   password: {
     type: String,
-    required: true,
+    require: true,
   },
 });
 UserSchema.pre("save", function (next) {
